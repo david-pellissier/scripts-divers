@@ -84,6 +84,3 @@ if __name__ == "__main__":
 	
 	init(command, success_substring, notif_message, show_output, check_interval)
 
-
-
-	
