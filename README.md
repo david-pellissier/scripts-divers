@@ -11,3 +11,6 @@ Vérifie la présence d'un substring en résultat d'une commande à intervalle r
 
 ## xfce-workspace-switch-with-notif
 Envoie une notification avec le numéro du workspace lors d'un changement. Il faut configurer les raccourcis en appelant ce script
+
+## ba-prepare-folders
+Crée la structure de dossiers pour un nouveau semestre
