@@ -1,0 +1,18 @@
+# Memo
+# > Rules need to be from the less to the more general
+# > Write comments on separate lines fomr the rules
+# > Beware of whitespaces
+
+# exclude
+- node_modules/**
+- .git/**
+- .idea/**
+- *.mp4
+- *.mkv
+
+# include
+# change number according to the semester
++ BA4_*/**
+
+# exclude everything else
+- ** 

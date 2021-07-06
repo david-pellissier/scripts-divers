@@ -1,0 +1,22 @@
+## Faces https://textfac.es/
+alias lennyf='echo -n "( ͡° ͜ʖ ͡°)" | xclip -selection c'
+alias dunnof='echo -n "¯\_(ツ)_/¯" | xclip -selection c'
+alias kawaiif='echo -n "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧" | xclip -selection c'
+alias cryf='echo -n "ಥ_ಥ" | xclip -selection c'
+alias tablef='echo -n "(╯°□°）╯︵ ┻━┻" | xclip -selection c'
+alias sunf='echo -n "(•_•) ( •_•)>⌐■-■ (⌐■_■)" | xclip -selection c'
+alias nekof='echo -n "ฅ^•ﻌ•^ฅ" | xclip -selection c'
+
+## ???
+alias stfu="shutdown 0"
+alias rr='curl -s -L bit.ly/10hA8iC | bash'
+
+## Utiles je crois
+alias clear-s="rm -rf ~/.tmux/resurrect & mkdir .tmux/resurrect"
+alias scheck="python ~/Projets/cmdNotif/scheck.py"
+alias newmd="touch file.md | vim test.md" 
+alias internetplz='scheck "ping 1.1.1.1 -c 1" "bytes from" "connection restored, bitch" -i 30'
+alias dockerup="sudo systemctl start docker"
+alias gck="python /opt/gaps-checker/request.py -f /opt/gaps-checker/.pwd.txt"
+alias gcko="python /opt/gaps-checker/request.py -f /opt/gaps-checker/.pwd.txt --html notes.html"
+alias ba-backup="/run/media/david/Cours/.backups/backup.sh"

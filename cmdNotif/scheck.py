@@ -1,0 +1,89 @@
+import os
+import sys
+import time
+
+def check(cmd, indicatorSuccess, notifMsg, showOutput):
+	stream = os.popen(cmd)
+	output = stream.read()
+	if showOutput:
+		print(output)
+	
+	if(indicatorSuccess in output):
+		icon = "emblem-ok-symbolic"
+		timenow= time.asctime(time.localtime())
+		notifCmd="notify-send -i " + icon + " \"" + timenow + " : " + notifMsg + "\" -t 0"	
+		os.popen(notifCmd)
+
+		print("Finished")		
+		exit()
+
+def init(cmd, indicatorSuccess, notifMsg, showOutput, interval):
+	if interval == 0:
+		check(cmd, indicatorSuccess, notifMsg, showOutput)
+	else:
+		while 1: 
+			check(cmd, indicatorSuccess, notifMsg, showOutput)
+			time.sleep(interval)
+
+def showHelp():
+	helpMsg="""
+	scheck <cmd> <success substring> <notif message> [-o, -i]
+
+	-o : show output of each check
+	-i : check interval(s), non present=single check
+	-h : show this help
+	"""
+	print(helpMsg, time.time())
+
+####### Main ######
+
+if __name__ == "__main__":
+	argCount = len(sys.argv)
+	if (argCount == 1) or (sys.argv[1] == "-h"):
+		showHelp()
+		exit()
+
+
+	if argCount < 4:
+		print("Missing one ore more arguments...")
+		showHelp()
+		exit()
+	
+
+	command = sys.argv[1]
+	success_substring = sys.argv[2]
+	notif_message = sys.argv[3]
+	show_output = 0
+	check_interval = 0   # 0 means only execute one check
+	
+	
+	if argCount != 4: 
+		argI = 4
+		while 1:	
+			if (argI+1) <= argCount:
+
+				if "-o" in sys.argv[argI]:
+					show_output = 1
+
+				elif "-i" in sys.argv[argI]:
+					if argCount >= argI+2:
+						check_interval = int(sys.argv[argI+1])
+						argI = argI + 1
+					else:
+						print("Missing value for \"-i\"")
+						exit()
+				else:
+					print("Unknown argument:", sys.argv[argI])
+					exit()
+			else: break
+
+			argI = argI + 1
+	
+
+	print("\nChecking \"", command, "\" with the success substring \"", success_substring, "\" with interval of ", check_interval, end="\n\n", sep=r"")
+	
+	init(command, success_substring, notif_message, show_output, check_interval)
+
+
+
+	
