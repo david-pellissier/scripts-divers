@@ -1,7 +1,7 @@
 #!/bin/bash
 echo Début de la synchronisation
 # source
-root="/run/media/david/Cours"
+root="/home/david/Cours"
 sourcedir=$root"/BA_ALL"
 confdir=$root"/.backups"
 logdir=$root"/.backups" #"/tmplog" # for debug

@@ -25,10 +25,10 @@ rclone config
 rclone config
 	n
 	11
-	no filename encryption
+	filename: simple obfuscation
 	no dir name encryption
 	password
-	sel: davidq
+	sel: david
 	
 
 # Script

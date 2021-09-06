@@ -6,7 +6,7 @@ then
 fi
 
 prefix="$1"
-root_dir="/run/media/david/Cours"
+root_dir="/home/david/Cours"
 all_dir="BA_ALL" # inside the root folder
 
 shift # remove first argument
