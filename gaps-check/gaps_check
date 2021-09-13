@@ -105,7 +105,7 @@ def checkModification(reponse, file=default_hashfile):
 def decodeReponse(s):
     text_decoded = html.unescape(s)
     text_decoded = text_decoded.replace("\\/", "/")
-    text_decoded = text_decoded.encode().decode('unicode_escape')
+    text_decoded = text_decoded.encode("latin1").decode('unicode_escape')
 
     # il y a ces caractères dans la réponse je sais pas pourquoi
     if text_decoded[:3] == '+:"':
@@ -138,7 +138,6 @@ def showHelp():
     with open(helpfile, "r") as text:
         print(text.read())
     exit()
-
 
 
 def getNotes(creds, open_in_browser=False, outputfile='', year=default_year, hashfile=default_year):
