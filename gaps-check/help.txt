@@ -10,7 +10,7 @@ usage: gaps_check [-f <creds file> | -s <creds string>] [-y <year>] [--html <out
         Un ou plusieurs champs peuvent rester vide. Ils seront alors demandés pendant l'exécution.
 
         IMPORTANT:  Il est conseillé de toujours omettre le mdp de la "creds string" afin d'éviter qu'il puisse être lu en clair sur votre système.
-                    Stocker en clair votre mdp est à vos risques et péril.
+                    Stocker en clair votre mdp est à vos risques et périls.
     
     Paramètres généraux:
         --hash  <file>      :   Permet de préciser un fichier contenant le hash. Par défaut: "notes<year>.hash" dans le dossier courant

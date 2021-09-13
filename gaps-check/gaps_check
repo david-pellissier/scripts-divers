@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # David Pellissier
 # Dépendances: requests
 #
@@ -5,18 +7,24 @@
 
 import requests, webbrowser, os, html
 from hashlib import md5
-from sys import argv
+from sys import argv,path
 from getpass import getpass
 from datetime import datetime, time
 from tempfile import mkstemp
 
-year = 2021
-hashfile = "notes%d.hash" % (year)
+helpfile=path[0]+"/help.txt"
+style=path[0]+"/style.html"
+
+default_year = 2021
+default_hashfile = path[0]+"notes%d.hash" % (default_year)
 
 class Credentials:
     id = 0
     user = ''
     password = ''
+
+    def isSet(self):
+        return self.id and self.user and self.password
 
     @staticmethod
     def parseCreds(creds_string):
@@ -30,17 +38,6 @@ class Credentials:
         tpassword = creds_string[sepUser + 1:]
 
         return tid, tusername, tpassword
-
-    def set(self, tid='', tusername='', tpassword=''):
-        if tid:
-            if not str(tid).isdecimal():
-                print("\n~ ERREUR: L'id doit être un nombre entier")
-                exit(1)
-            self.id = int(tid)            
-        if tusername:
-            self.user = tusername
-        if tpassword:
-            self.password = tpassword
 
     def prompt(self):
         tid=self.id
@@ -69,14 +66,21 @@ class Credentials:
 
         return self.parseCreds(creds_string)
 
-    def isSet(self):
-        return self.id and self.user and self.password
+    def set(self, tid='', tusername='', tpassword=''):
+        if tid:
+            if not str(tid).isdecimal():
+                print("\n~ ERREUR: L'id doit être un nombre entier")
+                exit(1)
+            self.id = int(tid)            
+        if tusername:
+            self.user = tusername
+        if tpassword:
+            self.password = tpassword
 
-
-def checkModification(reponse, file=hashfile):
+def checkModification(reponse, file=default_hashfile):
     old_hash = ''
     new_hash = md5(reponse.text.encode("utf-8")).hexdigest()
-
+    print(file)
     if os.path.exists(file):
         fs = open(file, "r")
         old_hash = fs.readline()
@@ -99,7 +103,6 @@ def checkModification(reponse, file=hashfile):
         return False
 
 def decodeReponse(s):
-
     text_decoded = html.unescape(s)
     text_decoded = text_decoded.replace("\\/", "/")
     text_decoded = text_decoded.encode().decode('unicode_escape')
@@ -118,10 +121,10 @@ def output(reponse, open_in_browser=False, outputfile=''):
         outputfile=mkstemp("_gaps.html")[1]
 
     text_decoded = decodeReponse(reponse.text)
-    text_decoded = text_decoded + "État des notes du %s" % (datetime.now().strftime("%d.%m.%Y à %H:%M")) + text_decoded
+    text_decoded = text_decoded + "État des notes du %s" % (datetime.now().strftime("%d.%m.%Y à %H:%M"))
 
     # style du tableau, pour le swag
-    with open("style.css", "r") as head:
+    with open(style, "r") as head:
         html_code = head.read() + text_decoded
 
     fs = open(outputfile, "w+") # créé si besoin
@@ -130,15 +133,15 @@ def output(reponse, open_in_browser=False, outputfile=''):
 
     if open_in_browser:
         webbrowser.open(outputfile, new=2)
-
-
+    
 def showHelp():
-    with open("help.txt", "r") as text:
+    with open(helpfile, "r") as text:
         print(text.read())
     exit()
 
 
-def main(creds, open_in_browser=False, outputfile=''):
+
+def getNotes(creds, open_in_browser=False, outputfile='', year=default_year, hashfile=default_year):
     base_site = 'https://gaps.heig-vd.ch/consultation'
     cc = base_site + '/controlescontinus/consultation.php?idst=' + str(creds.id)
 
@@ -158,47 +161,54 @@ def main(creds, open_in_browser=False, outputfile=''):
     gaps_session.post(base_site, params={'logout': 'yes'})
     gaps_session.close()
 
-    res = checkModification(notes)
+    res = checkModification(notes, hashfile)
 
     if open_in_browser or outputfile:
         output(notes, open_in_browser, outputfile)
 
-# Parser les arguments
-if __name__ == "__main__":
 
+def main():
     creds = Credentials()
-    open_in_browser = False
+    
     outputfile = ''
-    index = 1
+    open_in_browser = False
+    hashfile = default_hashfile
+    year = default_year
 
-    if (len(argv) == 2 and argv[1] == '-h'):
+    if len(argv) == 2:
         showHelp()
 
+    # Parser les arguments
+    index = 1
     while index < len(argv):
 
+        a=argv[index]
+
         # -o
-        if argv[index] == '-o':
+        if a == '-o':
             open_in_browser = True
+        elif a ==  '-h':
+            showHelp()
 
         # Les arguments suivants ont besoin d'une valeur
-        else: 
+        elif index < len(argv): 
             value = argv[index + 1]
 
             # -f <creds file>
-            if argv[index] == '-f':
+            if a == '-f':
                 creds.set(*creds.read(value))
-            # -s <creds string>
-            elif argv[index] == '-s':
-                creds.set(*creds.parseCreds(value))
-            # -y <year>
-            elif argv[index] == '-y':
-                year = int(value)
-            # --save-html <file>
-            elif argv[index] == '--save-html':
-                outputfile = value
             # --hash <file>
-            elif argv[index] == '--hash':
+            elif a == '--hash':
                 hashfile=value
+            # -s <creds string>
+            elif a == '-s':
+                creds.set(*creds.parseCreds(value))
+            # --save-html <file>
+            elif a == '--save-html':
+                outputfile = value
+            # -y <year>
+            elif a == '-y':
+                year = int(value)
             else:
                 showHelp()
             
@@ -208,5 +218,10 @@ if __name__ == "__main__":
 
     while not creds.isSet():
         creds.set(*creds.prompt())
+        
+    getNotes(creds, open_in_browser, outputfile, year, hashfile)
 
-    main(creds, open_in_browser, outputfile)
+
+
+if __name__ == "__main__":    
+    main()
