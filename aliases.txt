@@ -2,7 +2,6 @@
 alias lennyf='echo -n "( ͡° ͜ʖ ͡°)" | xclip -selection c'
 alias dunnof='echo -n "¯\_(ツ)_/¯" | xclip -selection c'
 alias kawaiif='echo -n "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧" | xclip -selection c'
-alias cryf='echo -n "ಥ_ಥ" | xclip -selection c'
 alias tablef='echo -n "(╯°□°）╯︵ ┻━┻" | xclip -selection c'
 alias sunf='echo -n "(•_•) ( •_•)>⌐■-■ (⌐■_■)" | xclip -selection c'
 alias nekof='echo -n "ฅ^•ﻌ•^ฅ" | xclip -selection c'
@@ -16,7 +15,7 @@ alias reboot="sudo reboot"
 alias scheck="python "/home/david/Projets/scripts-divers"/scheck/scheck.py"
 alias internetplz='scheck "ping 1.1.1.1 -c 1" "bytes from" "connection restored, bitch" -i 30'
 alias gck="gck -s 15691:david.pellissi: --hash /home/david/Cours/.notes2021.hash"
-alias gcko="gck -s 15691:david.pellissi: --hash /home/david/Cours/.notes2021.hash -o"
+alias gcko="gck -s 15691:david.pellissi: --hash /home/david/Cours/.notes2021.hash -o --save-html /home/david/Cours/notes.html"
 alias ba-backup="/home/david/Cours/.backups/backup.sh"
 
 # Raccourcis
@@ -30,4 +29,3 @@ alias AMT='cd /home/david/Cours/BA5_AMT'
 alias SYM='cd /home/david/Cours/BA5_SYM'
 alias WEB='cd /home/david/Cours/BA5_WEB'
 alias GRX='cd /home/david/Cours/BA5_GRX'
-
