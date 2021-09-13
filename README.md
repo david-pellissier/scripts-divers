@@ -43,5 +43,5 @@ Modifie le volume via ALSA et envoie une notification avec progress bar vers DUN
 
 exemple: `volume up`
 
-![image-20210913191828231](/home/david/Projets/scripts-divers/README.assets/image-20210913191828231.png)
+![image-20210913191828231](./README.assets/image-20210913191828231.png)
 
