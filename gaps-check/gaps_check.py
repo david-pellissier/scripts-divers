@@ -1,16 +1,17 @@
 # David Pellissier
-# Dépendances: module requests
+# Dépendances: requests
 #
-# Prévu pour Linux, mais fonctionne aussi sous Windows en commentant la ligne 80 (os.popen(...))
+# Prévu pour Linux, mais fonctionne aussi sous Windows
 
-import requests
-import webbrowser
-import os
+import requests, webbrowser, os, html
 from hashlib import md5
 from sys import argv
 from getpass import getpass
+from datetime import datetime, time
+from tempfile import mkstemp
 
-year = 2020
+year = 2021
+hashfile = "notes%d.hash" % (year)
 
 class Credentials:
     id = 0
@@ -30,19 +31,33 @@ class Credentials:
 
         return tid, tusername, tpassword
 
-    def set(self, tid, tusername, tpassword):
-        self.id = int(tid)
-        self.user = tusername
-        self.password = tpassword
+    def set(self, tid='', tusername='', tpassword=''):
+        if tid:
+            if not str(tid).isdecimal():
+                print("\n~ ERREUR: L'id doit être un nombre entier")
+                exit(1)
+            self.id = int(tid)            
+        if tusername:
+            self.user = tusername
+        if tpassword:
+            self.password = tpassword
 
     def prompt(self):
-        print("ID Gaps:", end=" ")
-        tid = input()
-        print("Utilisateur:", end=" ")
-        tusername = input()
-        tpassword = getpass('Mot de passe: ')
+        tid=self.id
+        tusername=self.user
+        tpassword=self.password
 
-        self.set(tid, tusername, tpassword)
+        if tid == 0 or not tid:
+            print("ID Gaps:", end=" ")
+            tid = input()
+        if not tusername:
+            print("Utilisateur:", end=" ")
+            tusername = input()
+        
+        if not tpassword:
+            tpassword = getpass('Mot de passe: ')
+
+        return tid,tusername,tpassword
 
     def read(self, file):
         fs = open(file, "r")
@@ -52,19 +67,13 @@ class Credentials:
         if creds_string[-1] == '\n':
             creds_string = creds_string[:-1]
 
-        tid, tusername, tpassword = self.parseCreds(creds_string)
-
-        self.set(tid, tusername, tpassword)
-
-    def setFromString(self, s):
-        tid, tusername, tpassword = self.parseCreds(s)
-        self.set(tid, tusername, tpassword)
+        return self.parseCreds(creds_string)
 
     def isSet(self):
-        return self.user and self.password
+        return self.id and self.user and self.password
 
 
-def checkModification(reponse, file="./latest.hash"):
+def checkModification(reponse, file=hashfile):
     old_hash = ''
     new_hash = md5(reponse.text.encode("utf-8")).hexdigest()
 
@@ -77,75 +86,59 @@ def checkModification(reponse, file="./latest.hash"):
         # pas de message la première fois que le script est exécuté
         if old_hash:
             print("Il y a du changement dans les notes GAPS !")
-            os.popen("notify-send 'GAPS checker' 'Il y a du changement dans les notes !' -t 0")
+            if os.name != "nt":
+                os.popen("notify-send 'GAPS' 'Il y a du changement dans les notes !' -t 0")
 
-        fs = open(file, "w")
+        fs = open(file, "w+")
         fs.write(str(new_hash))
         fs.close()
+
         return True
     else:
         print("Pas de changement.")
         return False
 
+def decodeReponse(s):
 
-def output(reponse, outputfile):
-    # decode la réponse GZIP (un peu à l'arrache, mais pour l'instant ça fait son travail)
-    text_decoded = reponse.text.replace("\\", "")
+    text_decoded = html.unescape(s)
+    text_decoded = text_decoded.replace("\\/", "/")
+    text_decoded = text_decoded.encode().decode('unicode_escape')
 
+    # il y a ces caractères dans la réponse je sais pas pourquoi
     if text_decoded[:3] == '+:"':
         text_decoded = text_decoded[3:]
     if text_decoded[-1] == '"':
         text_decoded = text_decoded[:-1]
 
-    # style du tableau, pour le swag
-    style = \
-        '''
-        <head>
-        <style type="text/css">
-            .bigheader              { background-color : #14161B; color : white ;}
-            .odd, .edge, .l2header  { background-color : #8C9BBD; }
-        </style>
-        </head>
-        '''
-    html = style + text_decoded
+    return text_decoded
 
-    fs = open(outputfile, "w")
-    fs.write(html)
+def output(reponse, open_in_browser=False, outputfile=''):
+    # crée un fichier temporaire si l'utilisateur n'a pas mis l'option '--save-html'
+    if not outputfile:
+        outputfile=mkstemp("_gaps.html")[1]
+
+    text_decoded = decodeReponse(reponse.text)
+    text_decoded = text_decoded + "État des notes du %s" % (datetime.now().strftime("%d.%m.%Y à %H:%M")) + text_decoded
+
+    # style du tableau, pour le swag
+    with open("style.css", "r") as head:
+        html_code = head.read() + text_decoded
+
+    fs = open(outputfile, "w+") # créé si besoin
+    fs.write(html_code)
     fs.close()
 
-    webbrowser.open(outputfile, new=2)
+    if open_in_browser:
+        webbrowser.open(outputfile, new=2)
 
 
 def showHelp():
-    text = \
-        '''
-usage: gaps_check [-f <creds file> | -u <gaps_id>:<user>:<password>] [-y <year>] [--html <output file>]
-    
-    Paramètres de login:
-        -f  <creds file>    :   récupère les identifiants dans le fichier spécifié.
-        -u  <creds string>  :   utilise les identifiants donnés par la string   
-    
-        Attention: d'un point de vue sécurité, il n'est pas recommandé d'utiliser -f et -u car il est possible de 
-        retrouver les valeurs en clair sur le système.
-        
-        Si aucune option de login n'est spécifié. Le script demandera les infos dans la console.
-    
-    Paramètres généraux:
-        -y  <year>          :   L'année scolaire en cours. Par défaut = 2020 (pour l'année 2020-2021)
-                                
-        --html  <output>    :   Enregistre les notes dans le fichier html donné. 
-                                Affiche immédiatement le fichier dans le navigateur 
-    Remarques:
-        - Le hash (latest.hash) est enregistré dans le dossier courant.
-            - Il faut toujours exécuter le script dans le dossier où se trouve le hash
-
-'''
-
-    print(text)
+    with open("help.txt", "r") as text:
+        print(text.read())
     exit()
 
 
-def main(creds, outputfile=''):
+def main(creds, open_in_browser=False, outputfile=''):
     base_site = 'https://gaps.heig-vd.ch/consultation'
     cc = base_site + '/controlescontinus/consultation.php?idst=' + str(creds.id)
 
@@ -157,8 +150,9 @@ def main(creds, outputfile=''):
     gaps_session.get(url=base_site, params=connect_params)
 
     # récupération des notes
+    cc_headers= {'Accept-Encoding': 'identity' }
     cc_params = {'rs': 'getStudentCCs', 'rsargs': '[%d, %d, null]' % (creds.id, year)}
-    notes = gaps_session.post(url=cc, params=cc_params)
+    notes = gaps_session.post(url=cc, params=cc_params, headers=cc_headers)
 
     # fermeture de session
     gaps_session.post(base_site, params={'logout': 'yes'})
@@ -166,42 +160,53 @@ def main(creds, outputfile=''):
 
     res = checkModification(notes)
 
-    if outputfile:
-        output(notes, outputfile)
-
+    if open_in_browser or outputfile:
+        output(notes, open_in_browser, outputfile)
 
 # Parser les arguments
 if __name__ == "__main__":
 
-    tcreds = Credentials()
-    toutputfile = ''
-
+    creds = Credentials()
+    open_in_browser = False
+    outputfile = ''
     index = 1
 
-    if (len(argv) == 2 and argv[1] == '-h') or (len(argv) % 2 == 0):
+    if (len(argv) == 2 and argv[1] == '-h'):
         showHelp()
 
-    while index < len(argv) - 1:
-        value = argv[index + 1]
+    while index < len(argv):
 
-        # -f <creds file>
-        if argv[index] == '-f':
-            tcreds.read(value)
-        # -u <creds string>
-        elif argv[index] == '-u':
-            tcreds.setFromString(value)
-        # --html <output file>
-        elif argv[index] == '--html':
-            toutputfile = value
-        # -y <year>
-        elif argv[index] == '-y':
-            year = value
-        else:
-            showHelp()
+        # -o
+        if argv[index] == '-o':
+            open_in_browser = True
 
-        index += 2
+        # Les arguments suivants ont besoin d'une valeur
+        else: 
+            value = argv[index + 1]
 
-    if not tcreds.isSet():
-        tcreds.prompt()
+            # -f <creds file>
+            if argv[index] == '-f':
+                creds.set(*creds.read(value))
+            # -s <creds string>
+            elif argv[index] == '-s':
+                creds.set(*creds.parseCreds(value))
+            # -y <year>
+            elif argv[index] == '-y':
+                year = int(value)
+            # --save-html <file>
+            elif argv[index] == '--save-html':
+                outputfile = value
+            # --hash <file>
+            elif argv[index] == '--hash':
+                hashfile=value
+            else:
+                showHelp()
+            
+            index += 1
 
-    main(tcreds, toutputfile)
+        index += 1
+
+    while not creds.isSet():
+        creds.set(*creds.prompt())
+
+    main(creds, open_in_browser, outputfile)
