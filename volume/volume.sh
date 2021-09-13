@@ -2,11 +2,12 @@
 # volume.sh : set volume and send **dunst** notifications
 
 AUDIO_SRC="Master"
-VALUE=1 # in percent
+VALUE=2 # in percent
 NOTIFY_ID=1337
 PROGRESS_CHAR="━"
 FILL_CHAR=" "
 MUTED_CHAR=""
+
 
 
 function helper(){

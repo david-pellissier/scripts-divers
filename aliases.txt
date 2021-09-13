@@ -9,19 +9,14 @@ alias nekof='echo -n "ฅ^•ﻌ•^ฅ" | xclip -selection c'
 
 ## ???
 alias stfu="sudo shutdown -h now"
-
 alias shutdown="sudo shutdown -h now"
-
 alias reboot="sudo reboot"
 
 ## Utiles je crois
-alias clear-s="rm -rf ~/.tmux/resurrect & mkdir .tmux/resurrect"
-alias scheck="python ~/Projets/cmdNotif/scheck.py"
-alias newmd="touch file.md | vim test.md" 
+alias scheck="python "/home/david/Projets/scripts-divers"/scheck/scheck.py"
 alias internetplz='scheck "ping 1.1.1.1 -c 1" "bytes from" "connection restored, bitch" -i 30'
-alias dockerup="sudo systemctl start docker"
-alias gck="python /opt/gaps-checker/request.py -f /opt/gaps-checker/.pwd.txt"
-alias gcko="python /opt/gaps-checker/request.py -f /opt/gaps-checker/.pwd.txt --html notes.html"
+alias gck="gck -s 15691:david.pellissi: --hash /home/david/Cours/.notes2021.hash"
+alias gcko="gck -s 15691:david.pellissi: --hash /home/david/Cours/.notes2021.hash -o"
 alias ba-backup="/home/david/Cours/.backups/backup.sh"
 
 # Raccourcis
