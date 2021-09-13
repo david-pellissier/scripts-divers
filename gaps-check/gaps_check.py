@@ -16,7 +16,7 @@ helpfile=path[0]+"/help.txt"
 style=path[0]+"/style.html"
 
 default_year = 2021
-default_hashfile = path[0]+"notes%d.hash" % (default_year)
+default_hashfile = path[0]+"/notes%d.hash" % (default_year)
 
 class Credentials:
     id = 0
@@ -80,7 +80,7 @@ class Credentials:
 def checkModification(reponse, file=default_hashfile):
     old_hash = ''
     new_hash = md5(reponse.text.encode("utf-8")).hexdigest()
-    print(file)
+   
     if os.path.exists(file):
         fs = open(file, "r")
         old_hash = fs.readline()
@@ -173,9 +173,6 @@ def main():
     open_in_browser = False
     hashfile = default_hashfile
     year = default_year
-
-    if len(argv) == 2:
-        showHelp()
 
     # Parser les arguments
     index = 1
