@@ -1,4 +1,4 @@
-usage: gaps_check [-f <creds file> | -s <creds string>] [-y <year>] [--html <output file>]
+usage: gaps_check [-f <creds file> | -s <creds string>] [-y <year>] [--save-html <output file>]
     
     Paramètres de login:
 
