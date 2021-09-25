@@ -12,8 +12,43 @@ from getpass import getpass
 from datetime import datetime, time
 from tempfile import mkstemp
 
-helpfile=path[0]+"/help.txt"
-style=path[0]+"/style.html"
+help_str= \
+    '''
+    usage: gaps_check [-f <creds file> | -s <creds string>] [-y <year>] [--save-html <output file>]
+    
+    Paramètres de login:
+
+        -f  <creds file>    :   récupère les identifiants dans le fichier spécifié contenant la "creds string".
+        -s  <creds string>  :   utilise les identifiants donnés par la string   
+        (rien)              :   toutes les infos seront demandées par le processus
+
+        Format des creds string: <user id>:<user>:<password>
+        Un ou plusieurs champs peuvent rester vide. Ils seront alors demandés pendant l'exécution.
+
+        IMPORTANT:  Il est conseillé de toujours omettre le mdp de la "creds string" afin d'éviter qu'il puisse être lu en clair sur votre système.
+                    Stocker en clair votre mdp est à vos risques et périls.
+    
+    Paramètres généraux:
+        --hash  <file>      :   Permet de préciser un fichier contenant le hash. Par défaut: "notes<year>.hash" dans le dossier courant
+
+        -o                  :   Affiche le résultat dans le navigateur
+
+        --save-html  <file> :   Enregistre le résultat dans le fichier donné  
+
+        -y  <year>          :   L'année scolaire en cours. Par défaut = 2021 (pour l'année 2021-2022)
+        
+    '''
+style_str= \
+    '''
+    <head>
+        <title>Notes</title>
+        <style type="text/css">
+            .bigheader { background-color : #14161B; color : white ; }
+            .odd, .edge, .l2header { background-color : #8C9BBD; }
+            table { width:90%; padding: 5%; margin:auto	}
+        </style>
+    </head>
+    '''
 
 default_year = 2021
 default_hashfile = path[0]+"/notes%d.hash" % (default_year)
@@ -123,9 +158,8 @@ def output(reponse, open_in_browser=False, outputfile=''):
     text_decoded = decodeReponse(reponse.text)
     text_decoded = text_decoded + "État des notes du %s" % (datetime.now().strftime("%d.%m.%Y à %H:%M"))
 
-    # style du tableau, pour le swag
-    with open(style, "r") as head:
-        html_code = head.read() + text_decoded
+    # appliquer le CSS
+    html_code = style_str + text_decoded
 
     fs = open(outputfile, "w+") # créé si besoin
     fs.write(html_code)
@@ -135,8 +169,7 @@ def output(reponse, open_in_browser=False, outputfile=''):
         webbrowser.open(outputfile, new=2)
     
 def showHelp():
-    with open(helpfile, "r") as text:
-        print(text.read())
+    print(help_str)
     exit()
 
 
@@ -183,11 +216,11 @@ def main():
         # -o
         if a == '-o':
             open_in_browser = True
-        elif a ==  '-h':
+        elif a ==  '-h' or a == '--help':
             showHelp()
 
         # Les arguments suivants ont besoin d'une valeur
-        elif index < len(argv): 
+        elif index < len(argv) -1: 
             value = argv[index + 1]
 
             # -f <creds file>
@@ -209,14 +242,17 @@ def main():
                 showHelp()
             
             index += 1
-
+        else:
+            print("L'option \"", a, "\" n'existe pas, ou a besoin d'une valeur.", sep="")
+            exit(0)
         index += 1
+        
+
 
     while not creds.isSet():
         creds.set(*creds.prompt())
         
     getNotes(creds, open_in_browser, outputfile, year, hashfile)
-
 
 
 if __name__ == "__main__":    
