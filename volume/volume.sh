@@ -44,7 +44,8 @@ function toggle_f(){
 
 function volume_f(){
 
-    output=$(amixer set $AUDIO_SRC $VALUE%$1)
+    #output=$(amixer set $AUDIO_SRC $VALUE%$1)
+    output=$(amixer set $AUDIO_SRC $VALUE$1)
     notify "$output"
 }
 

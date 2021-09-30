@@ -17,6 +17,9 @@ alias internetplz='scheck "ping 1.1.1.1 -c 1" "bytes from" "connection restored,
 alias gck="gck -s 15691:david.pellissi: --hash /home/david/Cours/.notes2021.hash"
 alias gcko="gck -s 15691:david.pellissi: --hash /home/david/Cours/.notes2021.hash -o --save-html /home/david/Cours/notes.html"
 alias ba-backup="/home/david/Cours/.backups/backup.sh"
+alias vpn-heig="sudo openconnect -u david.pellissi remote.heig-vd.ch"
+alias mmount="udisksctl mount -p block_devices/sda1" # change sda1 according to the right partition
+alias munmount="udisksctl unmount -p block_devices/sda1"
 
 # Raccourcis
 alias CTF='cd /home/david/Workspace/CTF'
